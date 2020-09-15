@@ -13,50 +13,50 @@
 
 (defn inject-lein-classpath [f libspecs]
   (go
-   (let [edited (lein/inject-dependency (io/slurp f) libspecs)]
-     (io/spit f edited))))
+    (let [edited (lein/inject-dependency (io/slurp f) libspecs)]
+      (io/spit f edited))))
 
 (defn run-check [handler]
   (fn [request]
     (go
-     (let [atmhome (io/file (.. js/process -env -ATOMIST_HOME))
-           args (cond
-                  (.exists (io/file atmhome "project.clj")) (-> request :check :lein-args)
-                  (.exists (io/file atmhome "deps.edn")) (-> request :check :deps-args))]
+      (let [atmhome (io/file (.. js/process -env -ATOMIST_HOME))
+            args (cond
+                   (.exists (io/file atmhome "project.clj")) (-> request :check :lein-args)
+                   (.exists (io/file atmhome "deps.edn")) (-> request :check :deps-args))]
 
-       (when (and
-              (.exists (io/file atmhome "project.clj"))
-              (-> request :check :lein-classpath))
-         (log/info "inject lein classpath")
-         (<! (inject-lein-classpath (io/file atmhome "project.clj") (-> request :check :lein-classpath))))
+        (when (and
+               (.exists (io/file atmhome "project.clj"))
+               (-> request :check :lein-classpath))
+          (log/info "inject lein classpath")
+          (<! (inject-lein-classpath (io/file atmhome "project.clj") (-> request :check :lein-classpath))))
 
-       (log/info "run " args)
-       (let [[err stdout stderr] (<! (proc/aexecFile (first args) (rest args) {:cwd (.getPath atmhome)
-                                                                               :env {}}))]
-         (cond
-           err
-           (<! (handler (assoc request
-                          :checkrun/conclusion "failure"
-                          :checkrun/output {:title (-> request :check :name)
-                                            :summary ((-> request :check :summary :failure) (. err -code) stdout stderr)})))
+        (log/info "run " args)
+        (let [[err stdout stderr] (<! (proc/aexecFile (first args) (rest args) {:cwd (.getPath atmhome)
+                                                                                :env {}}))]
+          (cond
+            err
+            (<! (handler (assoc request
+                                :checkrun/conclusion "failure"
+                                :checkrun/output {:title (-> request :check :name)
+                                                  :summary ((-> request :check :summary :failure) (. err -code) stdout stderr)})))
 
-           :else
-           (<! (handler (assoc request
-                          :checkrun/conclusion "success"
-                          :checkrun/output {:title (-> request :check :name)
-                                            :summary (-> request :check :summary :success)})))))))))
+            :else
+            (<! (handler (assoc request
+                                :checkrun/conclusion "success"
+                                :checkrun/output {:title (-> request :check :name)
+                                                  :summary (-> request :check :summary :success)})))))))))
 
 (defn run-checks [handler]
   (fn [request]
     (go
-     (<! (handler (assoc request :results (<! (->>
-                                               (for [check (:checks request)]
-                                                 ((-> #(go %)
-                                                      (run-check)
-                                                      (api/with-github-check-run :name (:name check)))
-                                                  (assoc request :check check)))
-                                               (async/merge)
-                                               (async/reduce conj [])))))))))
+      (<! (handler (assoc request :results (<! (->>
+                                                (for [check (:checks request)]
+                                                  ((-> #(go %)
+                                                       (run-check)
+                                                       (api/with-github-check-run :name (:name check)))
+                                                   (assoc request :check check)))
+                                                (async/merge)
+                                                (async/reduce conj [])))))))))
 
 (def checks {:clj-classpath-duplicates {:name "clj-classpath-duplicates"
                                         :deps-args ["clj" "-Sdeps" "{:deps {io.dominic/clj-classpath-duplicates {:mvn/version \"0.1.1\"}}}" "-m" "io.dominic.clj-classpath-duplicates.core"]
@@ -74,23 +74,23 @@
 (defn setup-checks [handler]
   (fn [request]
     (go
-     (<! (handler (assoc request :checks (->> #{:clj-classpath-duplicates}
-                                              (map #(checks %))
-                                              (filter identity)
-                                              (into []))))))))
+      (<! (handler (assoc request :checks (->> #{:clj-classpath-duplicates}
+                                               (map #(checks %))
+                                               (filter identity)
+                                               (into []))))))))
 
 (defn cancel-if-not-clojure [handler]
   (fn [request]
     (go
-     (let [atmhome (io/file (.. js/process -env -ATOMIST_HOME))]
-       (if (.exists atmhome)
-         (if (or (.exists (io/file atmhome "project.clj"))
-                 (.exists (io/file atmhome "deps.edn")))
-           (<! (handler request))
-           (<! (api/finish request :success "Skipping non-clojure project" :visibility :hidden)))
-         (do
-           (log/warn "there was no checked out " (.getPath atmhome))
-           (<! (api/finish request :failure "Failed to checkout"))))))))
+      (let [atmhome (io/file (.. js/process -env -ATOMIST_HOME))]
+        (if (.exists atmhome)
+          (if (or (.exists (io/file atmhome "project.clj"))
+                  (.exists (io/file atmhome "deps.edn")))
+            (<! (handler request))
+            (<! (api/finish request :success "Skipping non-clojure project" :visibility :hidden)))
+          (do
+            (log/warn "there was no checked out " (.getPath atmhome))
+            (<! (api/finish request :failure "Failed to checkout"))))))))
 
 (defn ^:export handler
   "no arguments because this handler runs in a container that should fulfill the Atomist container contract
