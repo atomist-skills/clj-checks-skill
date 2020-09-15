@@ -4,9 +4,9 @@
 
 # What it's useful for
 
-Create GitHub Checks whenever a Push event occurs.  Different checks can be enabled:
+Create GitHub Checks whenever a Push event occurs. Different checks can be enabled:
 
-*   [clj-classpath-duplicates (link to description)](https://sr.ht/~severeoverfl0w/clj-classpath-duplicates/)
+-   [clj-classpath-duplicates (link to description)](https://sr.ht/~severeoverfl0w/clj-classpath-duplicates/)
     The clj-classpath-duplicates check will run a check on any project containing a deps.edn or project.clj file.
 
 # Before you get started
