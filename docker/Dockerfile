@@ -1,5 +1,20 @@
-FROM gcr.io/atomist-container-skills/clojure-base:0.0.1
- 
+FROM clojure:openjdk-11-lein-2.9.3
+
+LABEL maintainer="Jim Clark <jim@atomist.com>"
+
+RUN apt-get update && apt-get install -y \
+        curl \
+        gnupg \
+        build-essential \
+        dumb-init
+
+RUN curl -sL https://deb.nodesource.com/setup_12.x  | bash - \
+    && apt-get -y install nodejs
+
+RUN curl -O https://download.clojure.org/install/linux-install-1.10.1.462.sh \
+    && chmod +x linux-install-1.10.1.462.sh \
+    && ./linux-install-1.10.1.462.sh
+
 WORKDIR /usr/src/app  
 
 COPY package*.json /usr/src/app/
