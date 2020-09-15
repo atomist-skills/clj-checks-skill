@@ -12,6 +12,7 @@
  :author "Atomist",
  :iconUrl "https://leiningen.org/img/leiningen.jpg",
  :homepageUrl "https://github.com/atomist-skills/clj-checks-skill",
+ :triggers ["OnAnyPush"]
  :parameters
  [{:boolean
    {:description "[clj classpath duplicates](https://sr.ht/~severeoverfl0w/clj-classpath-duplicates/) will use a deps.edn or project.clj file in the root of a project to scan the Classpath for any duplicate classes (or other resources).  This kind of hygiene can prevent difficult bugs that often creep in to JVM projects.  The goal is to have no duplicates."
