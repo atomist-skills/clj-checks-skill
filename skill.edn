@@ -1,5 +1,4 @@
-{:description "Keep your free from resource duplicates",
- :category ["DEPENDENCIES"],
+{:category ["DEPENDENCIES"],
  :license "Apache-2.0",
  :resourceProviders
  [{:name "github",
@@ -7,8 +6,8 @@
    :typeName "GitHubAppResourceProvider",
    :minRequired 1,
    :maxAllowed 1}],
- :displayName "Clj Classpath Duplicates Skill",
- :description ""
+ :displayName "Clj Checks Skill",
+ :description "run checks using clojure tools or leiningen"
  :name "clj-checks-skill",
  :author "Atomist",
  :iconUrl "https://leiningen.org/img/leiningen.jpg",
