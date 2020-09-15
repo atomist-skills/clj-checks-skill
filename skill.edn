@@ -1,0 +1,30 @@
+{:description "Keep your free from resource duplicates",
+ :category ["DEPENDENCIES"],
+ :license "Apache-2.0",
+ :resourceProviders
+ [{:name "github",
+   :description "GitHub",
+   :typeName "GitHubAppResourceProvider",
+   :minRequired 1,
+   :maxAllowed 1}],
+ :displayName "Clj Classpath Duplicates Skill",
+ :description ""
+ :name "clj-checks-skill",
+ :author "Atomist",
+ :iconUrl "https://leiningen.org/img/leiningen.jpg",
+ :homepageUrl "https://github.com/atomist-skills/clj-checks-skill",
+ :parameters
+ [{:boolean
+   {:description "[clj classpath duplicates](https://sr.ht/~severeoverfl0w/clj-classpath-duplicates/) will use a deps.edn or project.clj file in the root of a project to scan the Classpath for any duplicate classes (or other resources).  This kind of hygiene can prevent difficult bugs that often creep in to JVM projects.  The goal is to have no duplicates."
+    :displayName "enable clj classpath duplicates check"
+    :name "clj-classpath-duplicates"}}
+  {:repoFilter
+   {:description "Which repos/orgs to look at",
+    :displayName "Repository Scope",
+    :name "scope",
+    :required false}}],
+ :namespace "atomist",
+ :artifacts
+ {:docker
+  [{:name "skill",
+    :image "gcr.io/atomist-container-skills/clj-checks-skill"}]}}
