@@ -25,7 +25,7 @@ The **GitHub** integration must be configured in order to use this skill.
 
 2.  **Choose some Repos**
 
-This will only run checks on Repos that contain code where the check makes sense.  It's safe to enable this on all Repos.
+This will only run checks on Repos that contain code where the check makes sense. It's safe to enable this on all Repos.
 
 ![repo-filter](./docs/images/repo-filter.png)
 
