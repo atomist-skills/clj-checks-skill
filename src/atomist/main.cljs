@@ -59,14 +59,13 @@
                                                 (async/reduce conj [])))))))))
 
 (def checks {:clj-classpath-duplicates {:name "clj-classpath-duplicates"
-                                        :deps-args ["clj" "-Sdeps" "{:deps {io.dominic/clj-classpath-duplicates {:mvn/version \"0.1.1\"}}}" "-m" "io.dominic.clj-classpath-duplicates.core"]
+                                        :deps-args ["clojure" "-Sdeps" "{:deps {io.dominic/clj-classpath-duplicates {:mvn/version \"0.1.1\"}}}" "-m" "io.dominic.clj-classpath-duplicates.core"]
                                         :lein-classpath '[[io.dominic/clj-classpath-duplicates "0.1.1"]]
                                         :lein-args ["lein" "run" "-m" "io.dominic.clj-classpath-duplicates.core"]
                                         :summary {:success "no duplicates found"
                                                   :failure (fn [code stdout stderr]
                                                              (->>
                                                               [(gstring/format "found %d duplicates" code) ""]
-                                                              (concat [(str stdout)])
                                                               (concat [(str stderr)])
                                                               (interpose "\n")
                                                               (apply str)))}}})
