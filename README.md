@@ -19,7 +19,21 @@ The **GitHub** integration must be configured in order to use this skill.
 
 # How to configure
 
+1.  **Enable a Check**
+
+![enable](./docs/images/enable.png)
+
+2.  **Choose some Repos**
+
+This will only run checks on Repos that contain code where the check makes sense.  It's safe to enable this on all Repos.
+
+![repo-filter](./docs/images/repo-filter.png)
+
 ## How to use Update Leiningen Dependencies
+
+Each time you Push a change, this skill will activate the tool and use it to create GitHub checks:
+
+![checks](./docs/images/running.png)
 
 To create feature requests or bug reports, create an [issue in the repository for this skill](https://github.com/atomist-skills/clj-checks-skill/issues). See the [code](https://github.com/atomist-skills/clj-checks-skill) for the skill.
 

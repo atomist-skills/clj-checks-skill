@@ -9,3 +9,5 @@ classes/
 index.js
 .clj-kondo/
 payload.json
+**/.DS_Store
+
