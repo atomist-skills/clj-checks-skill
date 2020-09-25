@@ -36,7 +36,6 @@
     :displayName "enable lib-spec deps.edn/project.clj check"
     :name "lib-spec"
     :required false
-    :defaultValue "{lacinia {:mvn/verison \"0.1.0\"}}"
     :minRequired 0}}
   {:repoFilter
    {:description "Which repos/orgs to look at",
