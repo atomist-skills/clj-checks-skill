@@ -1,3 +1,17 @@
+;; Copyright © 2020 Atomist, Inc.
+;;
+;; Licensed under the Apache License, Version 2.0 (the "License");
+;; you may not use this file except in compliance with the License.
+;; You may obtain a copy of the License at
+;;
+;;     http://www.apache.org/licenses/LICENSE-2.0
+;;
+;; Unless required by applicable law or agreed to in writing, software
+;; distributed under the License is distributed on an "AS IS" BASIS,
+;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+;; See the License for the specific language governing permissions and
+;; limitations under the License.
+
 (ns atomist.checks.lib-spec
   (:require [cljs.core.async :refer [<!] :refer-macros [go]]
             [atomist.lein :as lein]
@@ -23,18 +37,18 @@
 (defn extract-lib-specs [handler]
   (fn [request]
     (go
-     (let [project-clj (io/file (:atmhome request) "project.clj")
-           deps-edn (io/file (:atmhome request) "deps.edn")]
-       (<! (handler (cond-> request
-                            (.exists project-clj) (assoc :lein-specs (<! (lein/deps (io/slurp project-clj))))
-                            (.exists deps-edn) (assoc :deps-specs (<! (tools/deps (io/slurp deps-edn)))))))))))
+      (let [project-clj (io/file (:atmhome request) "project.clj")
+            deps-edn (io/file (:atmhome request) "deps.edn")]
+        (<! (handler (cond-> request
+                       (.exists project-clj) (assoc :lein-specs (<! (lein/deps (io/slurp project-clj))))
+                       (.exists deps-edn) (assoc :deps-specs (<! (tools/deps (io/slurp deps-edn)))))))))))
 
 (defn run-check
   [request]
   ((-> (fn [request]
          (go (<! (cond-> request
-                         (:lein-specs request) (lein/check-spec (:lein-specs request) (-> request :check :lib-spec))
-                         (:deps-specs request) (tools/check-spec (:deps-specs request) (-> request :check :lib-spec))))))
+                   (:lein-specs request) (lein/check-spec (:lein-specs request) (-> request :check :lib-spec))
+                   (:deps-specs request) (tools/check-spec (:deps-specs request) (-> request :check :lib-spec))))))
        (extract-lib-specs))
    request))
 
