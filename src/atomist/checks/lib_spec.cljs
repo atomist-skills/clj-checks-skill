@@ -23,18 +23,18 @@
 (defn extract-lib-specs [handler]
   (fn [request]
     (go
-     (let [project-clj (io/file (:atmhome request) "project.clj")
-           deps-edn (io/file (:atmhome request) "deps.edn")]
-       (<! (handler (cond-> request
-                            (.exists project-clj) (assoc :lein-specs (<! (lein/deps (io/slurp project-clj))))
-                            (.exists deps-edn) (assoc :deps-specs (<! (tools/deps (io/slurp deps-edn)))))))))))
+      (let [project-clj (io/file (:atmhome request) "project.clj")
+            deps-edn (io/file (:atmhome request) "deps.edn")]
+        (<! (handler (cond-> request
+                       (.exists project-clj) (assoc :lein-specs (<! (lein/deps (io/slurp project-clj))))
+                       (.exists deps-edn) (assoc :deps-specs (<! (tools/deps (io/slurp deps-edn)))))))))))
 
 (defn run-check
   [request]
   ((-> (fn [request]
          (go (<! (cond-> request
-                         (:lein-specs request) (lein/check-spec (:lein-specs request) (-> request :check :lib-spec))
-                         (:deps-specs request) (tools/check-spec (:deps-specs request) (-> request :check :lib-spec))))))
+                   (:lein-specs request) (lein/check-spec (:lein-specs request) (-> request :check :lib-spec))
+                   (:deps-specs request) (tools/check-spec (:deps-specs request) (-> request :check :lib-spec))))))
        (extract-lib-specs))
    request))
 

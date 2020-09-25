@@ -13,60 +13,60 @@
 (defn run-check [handler]
   (fn [request]
     (go
-     (<! (handler (<! ((-> request :check :run-check) request)))))))
+      (<! (handler (<! ((-> request :check :run-check) request)))))))
 
 ;; wait for each check to complete - setup check-run handler
 (defn run-checks [handler]
   (fn [request]
     (go
-     (log/info "run checks " (:checks request))
-     (<! (handler (assoc request :results (<! (->>
-                                               (for [check (:checks request)]
-                                                 ((-> #(go %)
-                                                      (run-check)
-                                                      (api/with-github-check-run :name (:check-name check)))
-                                                  (assoc request :check check)))
-                                               (async/merge)
-                                               (async/reduce conj [])))))))))
+      (log/info "run checks " (:checks request))
+      (<! (handler (assoc request :results (<! (->>
+                                                (for [check (:checks request)]
+                                                  ((-> #(go %)
+                                                       (run-check)
+                                                       (api/with-github-check-run :name (:check-name check)))
+                                                   (assoc request :check check)))
+                                                (async/merge)
+                                                (async/reduce conj [])))))))))
 
 ;; scan configuration and setup checks
 (defn setup-checks [handler]
   (fn [request]
     (go
-     (<! (handler
-          (assoc request
-            :checks (->> [lein-deps-tree/check lib-spec/check clj-class-path-duplicates/check]
-                         (mapcat (fn [{:keys [check-names] :as check}]
-                                   (->> (check-names request check)
-                                        (into []))))
-                         (into []))))))))
+      (<! (handler
+           (assoc request
+                  :checks (->> [lein-deps-tree/check lib-spec/check clj-class-path-duplicates/check]
+                               (mapcat (fn [{:keys [check-names] :as check}]
+                                         (->> (check-names request check)
+                                              (into []))))
+                               (into []))))))))
 
 (defn cancel-if-not-clojure [handler]
   (fn [request]
     (go
-     (let [atmhome (io/file (.. js/process -env -ATOMIST_HOME))]
-       (if (.exists atmhome)
-         (if (or (.exists (io/file atmhome "project.clj"))
-                 (.exists (io/file atmhome "deps.edn")))
-           (<! (handler (assoc request :atmhome atmhome)))
-           (<! (api/finish request :success "Skipping non-clojure project" :visibility :hidden)))
-         (do
-           (log/warn "there was no checked out " (.getPath atmhome))
-           (<! (api/finish request :failure "Failed to checkout"))))))))
+      (let [atmhome (io/file (.. js/process -env -ATOMIST_HOME))]
+        (if (.exists atmhome)
+          (if (or (.exists (io/file atmhome "project.clj"))
+                  (.exists (io/file atmhome "deps.edn")))
+            (<! (handler (assoc request :atmhome atmhome)))
+            (<! (api/finish request :success "Skipping non-clojure project" :visibility :hidden)))
+          (do
+            (log/warn "there was no checked out " (.getPath atmhome))
+            (<! (api/finish request :failure "Failed to checkout"))))))))
 
 (defn perform-requested-action [handler]
   (fn [request]
     (go
-     (api/trace (str "perform requested action " (:action-identifier request)))
-     (<! (handler request)))))
+      (api/trace (str "perform requested action " (:action-identifier request)))
+      (<! (handler request)))))
 
 (defn check-run-action [handler]
   (fn [request]
     (go
-     (log/info "check-run-action:  " (-> request :data :CheckRun))
-     (if (= "requested_action" (-> request :data :CheckRun first :action))
-       (<! (handler (assoc request :action-identifier (-> request :data :CheckRun first :requestedActionIdentifier))))
-       (<! (api/finish request :visibility :hidden))))))
+      (log/info "check-run-action:  " (-> request :data :CheckRun))
+      (if (= "requested_action" (-> request :data :CheckRun first :action))
+        (<! (handler (assoc request :action-identifier (-> request :data :CheckRun first :requestedActionIdentifier))))
+        (<! (api/finish request :visibility :hidden))))))
 
 (def on-push
   (-> (api/finished :message "----> Push event handler finished"
@@ -97,17 +97,17 @@
    {}))
 
 (comment
- (require '[atomist.local-runner :as lr])
- (do
-   (lr/set-env :prod-github-auth)
-   (->
-    (lr/fake-push
-     "AEIB5886C"
-     "slimslender"
-     {:name "clj2" :id "AEIB5886C_AEIB5886C_slimslender_133574647"}
-     "master")
-    (assoc-in [:data :Push 0 :after :sha] "47ddf9aed42e8aa1e962c7a94b1fe379b05c296d")
-    (lr/add-configuration {:name "default"
-                           :parameters [{:name "lib-spec"
-                                         :value ["[metosin/compojure-api \"1.1.14\"]"]}]})
-    (lr/container-contract handler))))
+  (require '[atomist.local-runner :as lr])
+  (do
+    (lr/set-env :prod-github-auth)
+    (->
+     (lr/fake-push
+      "AEIB5886C"
+      "slimslender"
+      {:name "clj2" :id "AEIB5886C_AEIB5886C_slimslender_133574647"}
+      "master")
+     (assoc-in [:data :Push 0 :after :sha] "47ddf9aed42e8aa1e962c7a94b1fe379b05c296d")
+     (lr/add-configuration {:name "default"
+                            :parameters [{:name "lib-spec"
+                                          :value ["[metosin/compojure-api \"1.1.14\"]"]}]})
+     (lr/container-contract handler))))
