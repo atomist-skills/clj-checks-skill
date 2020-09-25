@@ -72,15 +72,19 @@
   (fn [request]
     (go
       (api/trace (str "perform requested action " (:action-identifier request)))
+      (doseq [spec (:lib-spec request)]
+        (log/info spec " -> " (= (js/parseInt (:action-identifier request)) (hash spec))))
       (<! (handler request)))))
 
 (defn check-run-action [handler]
   (fn [request]
     (go
       (log/info "check-run-action:  " (-> request :data :CheckRun))
-      (if (= "requested_action" (-> request :data :CheckRun first :action))
+      (if (and
+           (= "requested_action" (-> request :data :CheckRun first :action))
+           (-> request :data :CheckRun first :requestedActionIdentifier))
         (<! (handler (assoc request :action-identifier (-> request :data :CheckRun first :requestedActionIdentifier))))
-        (<! (api/finish request :visibility :hidden))))))
+        (<! (api/finish request :visibility :hidden :success "skip CheckRun"))))))
 
 (def on-push
   (-> (api/finished :message "----> Push event handler finished"
@@ -92,6 +96,11 @@
   (-> (api/finished :message "----> CheckRun event handler finished"
                     :success "completed")
       (perform-requested-action)
+      (api/edit-inside-PR {:branch ""
+                           :target-branch ""
+                           :body ""
+                           :title ""
+                           :labels []})
       (api/clone-ref)
       (check-run-action)))
 

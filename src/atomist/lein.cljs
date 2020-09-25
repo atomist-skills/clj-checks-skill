@@ -32,7 +32,7 @@
       (assoc request :checkrun/conclusion "action_required"
              :checkrun/actions [{:label "fix"
                                  :description "open a PR with a new Dependency"
-                                 :identifier "id"}]
+                                 :identifier (str (hash target-spec))}]
              :checkrun/output {:title (-> request :check :title)
                                :summary (gstring/format "%s is at version %s.  Target is %s"
                                                         (first target-spec)
