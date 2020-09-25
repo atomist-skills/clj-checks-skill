@@ -7,10 +7,10 @@
     "atm:lint:prettier": "prettier --write"
   },
   "dependencies": {
-    "@atomist/api-cljs": "^0.4.39"
+    "@atomist/api-cljs": "^0.4.105"
   },
   "devDependencies": {
-    "@atomist/skill-bundler": "^0.1.21",
+    "@atomist/skill-bundler": "^0.1.22",
     "@google-cloud/functions-framework": "^1.5.1",
     "husky": "^4.3.0",
     "lint-staged": "^10.3.0",

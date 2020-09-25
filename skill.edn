@@ -5,14 +5,19 @@
    :description "GitHub",
    :typeName "GitHubAppResourceProvider",
    :minRequired 1,
+   :maxAllowed 1}
+  {:name "maven",
+   :description "Maven repository for resolving artifacts referenced in project.clj",
+   :typeName "MavenRepositoryProvider",
+   :minRequired 0,
    :maxAllowed 1}],
  :displayName "Clj Checks Skill",
- :description "run checks using clojure tools or leiningen"
+ :description "run checks using clojure tools or leiningen",
  :name "clj-checks-skill",
  :author "Atomist",
  :iconUrl "https://leiningen.org/img/leiningen.jpg",
  :homepageUrl "https://github.com/atomist-skills/clj-checks-skill",
- :triggers ["OnAnyPush"]
+ :triggers ["OnAnyPush" "OnCheckRun"]
  :parameters
  [{:boolean
    {:description "[clj classpath duplicates](https://sr.ht/~severeoverfl0w/clj-classpath-duplicates/) will use a deps.edn or project.clj file in the root of a project to scan the Classpath for any duplicate classes (or other resources).  This kind of hygiene can prevent difficult bugs that often creep in to JVM projects.  The goal is to have no duplicates."
@@ -20,6 +25,19 @@
     :name "clj-classpath-duplicates"
     :required true
     :default false}}
+  {:boolean
+   {:description "Check whether leiningen is reporting any confusing dependencies for the project.clj in this repo."
+    :displayName "enable lein deps tree check"
+    :name "lein-deps-tree"
+    :required true
+    :default false}}
+  {:stringArray
+   {:description "Configure lib-specs either as tools deps forms (`{lacinia {:mvn/version \"0.1.0\"}}` or as lein/boot forms (`[lacinia \"0.1.0-XABLAW\"]`).  You can enter as many different specs as you want.  Only projects that contain some version of this spec will trigger a check."
+    :displayName "enable lib-spec deps.edn/project.clj check"
+    :name "lib-spec"
+    :required false
+    :defaultValue "{lacinia {:mvn/verison \"0.1.0\"}}"
+    :minRequired 0}}
   {:repoFilter
    {:description "Which repos/orgs to look at",
     :displayName "Repository Scope",

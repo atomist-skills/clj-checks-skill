@@ -2,103 +2,91 @@
   (:require [atomist.api :as api]
             [atomist.cljs-log :as log]
             [atomist.container :as container]
-            [atomist.lein :as lein]
             [cljs-node-io.core :as io]
-            [cljs-node-io.proc :as proc]
             [cljs.pprint :refer [pprint]]
-            [clojure.string :as str]
-            [goog.string :as gstring]
             [goog.string.format]
+            [atomist.checks.clj-classpath-duplicates :as clj-class-path-duplicates]
+            [atomist.checks.lib-spec :as lib-spec]
+            [atomist.checks.lein-deps-tree :as lein-deps-tree]
             [cljs.core.async :as async :refer [<! >! chan timeout] :refer-macros [go]]))
-
-(defn inject-lein-classpath [f libspecs]
-  (go
-    (let [edited (lein/inject-dependency (io/slurp f) libspecs)]
-      (io/spit f edited))))
 
 (defn run-check [handler]
   (fn [request]
     (go
-      (let [atmhome (io/file (.. js/process -env -ATOMIST_HOME))
-            args (cond
-                   (.exists (io/file atmhome "project.clj")) (-> request :check :lein-args)
-                   (.exists (io/file atmhome "deps.edn")) (-> request :check :deps-args))]
+     (<! (handler (<! ((-> request :check :run-check) request)))))))
 
-        (when (and
-               (.exists (io/file atmhome "project.clj"))
-               (-> request :check :lein-classpath))
-          (log/info "inject lein classpath")
-          (<! (inject-lein-classpath (io/file atmhome "project.clj") (-> request :check :lein-classpath))))
-
-        (log/info "run " args)
-        (let [[err stdout stderr] (<! (proc/aexecFile (first args) (rest args) {:cwd (.getPath atmhome)
-                                                                                :env {}}))]
-          (cond
-            err
-            (<! (handler (assoc request
-                                :checkrun/conclusion "failure"
-                                :checkrun/output {:title (-> request :check :name)
-                                                  :summary ((-> request :check :summary :failure) (. err -code) stdout stderr)})))
-
-            :else
-            (<! (handler (assoc request
-                                :checkrun/conclusion "success"
-                                :checkrun/output {:title (-> request :check :name)
-                                                  :summary (-> request :check :summary :success)})))))))))
-
+;; wait for each check to complete - setup check-run handler
 (defn run-checks [handler]
   (fn [request]
     (go
-      (<! (handler (assoc request :results (<! (->>
-                                                (for [check (:checks request)]
-                                                  ((-> #(go %)
-                                                       (run-check)
-                                                       (api/with-github-check-run :name (:name check)))
-                                                   (assoc request :check check)))
-                                                (async/merge)
-                                                (async/reduce conj [])))))))))
+     (log/info "run checks " (:checks request))
+     (<! (handler (assoc request :results (<! (->>
+                                               (for [check (:checks request)]
+                                                 ((-> #(go %)
+                                                      (run-check)
+                                                      (api/with-github-check-run :name (:check-name check)))
+                                                  (assoc request :check check)))
+                                               (async/merge)
+                                               (async/reduce conj [])))))))))
 
-(def checks {:clj-classpath-duplicates {:name "clj-classpath-duplicates"
-                                        :deps-args ["clojure" "-Sdeps" "{:deps {io.dominic/clj-classpath-duplicates {:mvn/version \"0.1.1\"}}}" "-m" "io.dominic.clj-classpath-duplicates.core"]
-                                        :lein-classpath '[[io.dominic/clj-classpath-duplicates "0.1.1"]]
-                                        :lein-args ["lein" "run" "-m" "io.dominic.clj-classpath-duplicates.core"]
-                                        :summary {:success "no duplicates found"
-                                                  :failure (fn [code stdout stderr]
-                                                             (->>
-                                                              [(gstring/format "found %d duplicates" code) ""]
-                                                              (concat [(str stderr)])
-                                                              (interpose "\n")
-                                                              (apply str)))}}})
-
+;; scan configuration and setup checks
 (defn setup-checks [handler]
   (fn [request]
     (go
-      (<! (handler (assoc request :checks (->> #{:clj-classpath-duplicates}
-                                               (map #(checks %))
-                                               (filter identity)
-                                               (into []))))))))
+     (<! (handler
+          (assoc request
+            :checks (->> [lein-deps-tree/check lib-spec/check clj-class-path-duplicates/check]
+                         (mapcat (fn [{:keys [check-names] :as check}]
+                                   (->> (check-names request check)
+                                        (into []))))
+                         (into []))))))))
 
 (defn cancel-if-not-clojure [handler]
   (fn [request]
     (go
-      (let [atmhome (io/file (.. js/process -env -ATOMIST_HOME))]
-        (if (.exists atmhome)
-          (if (or (.exists (io/file atmhome "project.clj"))
-                  (.exists (io/file atmhome "deps.edn")))
-            (<! (handler request))
-            (<! (api/finish request :success "Skipping non-clojure project" :visibility :hidden)))
-          (do
-            (log/warn "there was no checked out " (.getPath atmhome))
-            (<! (api/finish request :failure "Failed to checkout"))))))))
+     (let [atmhome (io/file (.. js/process -env -ATOMIST_HOME))]
+       (if (.exists atmhome)
+         (if (or (.exists (io/file atmhome "project.clj"))
+                 (.exists (io/file atmhome "deps.edn")))
+           (<! (handler (assoc request :atmhome atmhome)))
+           (<! (api/finish request :success "Skipping non-clojure project" :visibility :hidden)))
+         (do
+           (log/warn "there was no checked out " (.getPath atmhome))
+           (<! (api/finish request :failure "Failed to checkout"))))))))
+
+(defn perform-requested-action [handler]
+  (fn [request]
+    (go
+     (api/trace (str "perform requested action " (:action-identifier request)))
+     (<! (handler request)))))
+
+(defn check-run-action [handler]
+  (fn [request]
+    (go
+     (log/info "check-run-action:  " (-> request :data :CheckRun))
+     (if (= "requested_action" (-> request :data :CheckRun first :action))
+       (<! (handler (assoc request :action-identifier (-> request :data :CheckRun first :requestedActionIdentifier))))
+       (<! (api/finish request :visibility :hidden))))))
+
+(def on-push
+  (-> (api/finished :message "----> Push event handler finished"
+                    :success "completed")
+      (run-checks)
+      (setup-checks)))
+
+(def on-check-run
+  (-> (api/finished :message "----> CheckRun event handler finished"
+                    :success "completed")
+      (perform-requested-action)
+      (api/clone-ref)
+      (check-run-action)))
 
 (defn ^:export handler
   "no arguments because this handler runs in a container that should fulfill the Atomist container contract
    the context is extract fro the environment using the container/mw-make-container-request middleware"
   []
-  ((-> (api/finished :message "----> Push event handler finished"
-                     :success "completed")
-       (run-checks)
-       (setup-checks)
+  ((-> (api/dispatch {:OnAnyPush on-push
+                      :OnCheckRun on-check-run})
        (cancel-if-not-clojure)
        (api/extract-github-token)
        (api/add-skill-config)
@@ -107,3 +95,19 @@
        (api/status)
        (container/mw-make-container-request))
    {}))
+
+(comment
+ (require '[atomist.local-runner :as lr])
+ (do
+   (lr/set-env :prod-github-auth)
+   (->
+    (lr/fake-push
+     "AEIB5886C"
+     "slimslender"
+     {:name "clj2" :id "AEIB5886C_AEIB5886C_slimslender_133574647"}
+     "master")
+    (assoc-in [:data :Push 0 :after :sha] "47ddf9aed42e8aa1e962c7a94b1fe379b05c296d")
+    (lr/add-configuration {:name "default"
+                           :parameters [{:name "lib-spec"
+                                         :value ["[metosin/compojure-api \"1.1.14\"]"]}]})
+    (lr/container-contract handler))))
