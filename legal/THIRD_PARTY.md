@@ -137,7 +137,7 @@ MIT License - [https://opensource.org/licenses/MIT](https://opensource.org/licen
 | `@types/duplexify`       | `3.6.0`    |                     | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                       |
 | `@types/fs-extra`        | `8.1.1`    |                     | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                       |
 | `@types/long`            | `4.0.1`    |                     | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                       |
-| `@types/node`            | `13.13.21` |                     | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                       |
+| `@types/node`            | `13.13.26` |                     | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                       |
 | `abort-controller`       | `3.0.0`    | Toru Nagashima      | [https://github.com/mysticatea/abort-controller](https://github.com/mysticatea/abort-controller)                                               |
 | `agent-base`             | `6.0.1`    | Nathan Rajlich      | [https://github.com/TooTallNate/node-agent-base](https://github.com/TooTallNate/node-agent-base)                                               |
 | `argparse`               | `1.0.10`   |                     | [https://github.com/nodeca/argparse](https://github.com/nodeca/argparse)                                                                       |
@@ -145,7 +145,7 @@ MIT License - [https://opensource.org/licenses/MIT](https://opensource.org/licen
 | `async-each`             | `1.0.3`    | Paul Miller         | [https://github.com/paulmillr/async-each](https://github.com/paulmillr/async-each)                                                             |
 | `balanced-match`         | `1.0.0`    | Julian Gruber       | [https://github.com/juliangruber/balanced-match](https://github.com/juliangruber/balanced-match)                                               |
 | `base64-js`              | `1.3.1`    | T. Jameson Little   | [https://github.com/beatgammit/base64-js](https://github.com/beatgammit/base64-js)                                                             |
-| `bignumber.js`           | `9.0.0`    | Michael Mclaughlin  | [https://github.com/MikeMcl/bignumber.js](https://github.com/MikeMcl/bignumber.js)                                                             |
+| `bignumber.js`           | `9.0.1`    | Michael Mclaughlin  | [https://github.com/MikeMcl/bignumber.js](https://github.com/MikeMcl/bignumber.js)                                                             |
 | `brace-expansion`        | `1.1.11`   | Julian Gruber       | [https://github.com/juliangruber/brace-expansion](https://github.com/juliangruber/brace-expansion)                                             |
 | `braces`                 | `3.0.2`    | Jon Schlinkert      | [https://github.com/micromatch/braces](https://github.com/micromatch/braces)                                                                   |
 | `buffer-from`            | `1.1.1`    |                     | [https://github.com/LinusU/buffer-from](https://github.com/LinusU/buffer-from)                                                                 |
@@ -156,7 +156,7 @@ MIT License - [https://opensource.org/licenses/MIT](https://opensource.org/licen
 | `crypto-random-string`   | `2.0.0`    | Sindre Sorhus       | [https://github.com/sindresorhus/crypto-random-string](https://github.com/sindresorhus/crypto-random-string)                                   |
 | `d64`                    | `1.0.0`    | Dominic Tarr        | [https://github.com/dominictarr/d64](https://github.com/dominictarr/d64)                                                                       |
 | `date-and-time`          | `0.13.1`   | KNOWLEDGECODE       | [https://github.com/knowledgecode/date-and-time](https://github.com/knowledgecode/date-and-time)                                               |
-| `debug`                  | `4.1.1`    | TJ Holowaychuk      | [https://github.com/visionmedia/debug](https://github.com/visionmedia/debug)                                                                   |
+| `debug`                  | `4.2.0`    | TJ Holowaychuk      | [https://github.com/visionmedia/debug](https://github.com/visionmedia/debug)                                                                   |
 | `dot-prop`               | `5.3.0`    | Sindre Sorhus       | [https://github.com/sindresorhus/dot-prop](https://github.com/sindresorhus/dot-prop)                                                           |
 | `duplexify`              | `3.7.1`    | Mathias Buus        | [https://github.com/mafintosh/duplexify](https://github.com/mafintosh/duplexify)                                                               |
 | `duplexify`              | `4.1.1`    | Mathias Buus        | [https://github.com/mafintosh/duplexify](https://github.com/mafintosh/duplexify)                                                               |
@@ -246,7 +246,7 @@ MIT License - [https://opensource.org/licenses/MIT](https://opensource.org/licen
 
 | Name                | Version   | Publisher       | Repository |
 | ------------------- | --------- | --------------- | ---------- |
-| `@atomist/api-cljs` | `0.4.105` | jim@atomist.com |            |
+| `@atomist/api-cljs` | `0.4.111` | jim@atomist.com |            |
 
 ## Contact
 
