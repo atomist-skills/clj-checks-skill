@@ -1,4 +1,4 @@
-FROM clojure:openjdk-11-lein-2.9.3@sha256:9edfff75280da4e5875381a502ffe2aec0be87b54d3ad0da0fe16a2d0512b9c3
+FROM clojure:openjdk-11-lein-2.9.3@sha256:416e12c0e28470b9a406ebe8ab21347d142b4f3b53539ae90c559cc392184aed
 
 LABEL maintainer="Jim Clark <jim@atomist.com>"
 
