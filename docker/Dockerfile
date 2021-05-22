@@ -3,10 +3,10 @@ FROM clojure:openjdk-11-lein-2.9.3@sha256:9edfff75280da4e5875381a502ffe2aec0be87
 LABEL maintainer="Jim Clark <jim@atomist.com>"
 
 RUN apt-get update && apt-get install -y \
-        curl \
-        gnupg \
-        build-essential \
-        dumb-init
+    build-essential=12.6 \
+    curl=7.64.0-4+deb10u2 \
+    dumb-init=1.2.2-1.1 \
+    gnupg=2.2.12-1+deb10u1
 
 RUN curl -sL https://deb.nodesource.com/setup_12.x  | bash - \
     && apt-get -y install nodejs
